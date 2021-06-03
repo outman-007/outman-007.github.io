@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://outman-007.github.io</id>
     <title>奥特MAN</title>
-    <updated>2021-06-03T09:39:02.814Z</updated>
+    <updated>2021-06-03T09:45:43.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://outman-007.github.io"/>
     <link rel="self" href="https://outman-007.github.io/atom.xml"/>
@@ -615,7 +615,8 @@ User Task 用户任务 Service Task 服务任务 Sub Process 子流程<br>
 合并--所有从并行网关拆分并执行完成的线路均在此等候，直到所有的线路执行完成才继续向下执行。<br>
 <strong>事件网关（OO）</strong><br>
 --专门为中间捕获事件设置的，允许设置多个输出流指向多个不同的中间捕获事件，当流程执行到事件网关后，流程处于等待状态，需要等待抛出事件才能将等待状态转换为活动状态。</p>
-<h2 id="52-流程设计器的使用">5.2 流程设计器的使用</h2>
+<h1 id="六-流程操作">六、流程操作</h1>
+<h2 id="61-流程定义">6.1 流程定义</h2>
 <p><strong>Activiti-Designer使用</strong><br>
 <strong>Paletter（画板）</strong><br>
 在IDEA中安装插件即可使用，画板中包括以下节点：<br>
@@ -632,7 +633,7 @@ Boundary event-边界事件<br>
 设置流程ID和流程名称 在流程的空白处进行点击修改对应的ID和名称是对应的流程的ID和名称如下图：   <img src="https://outman-007.github.io/post-images/1622691153834.png" alt="" loading="lazy"><br>
 设置流程中的各个流程的操作人如下图：<br>
 <img src="https://outman-007.github.io/post-images/1622691320447.png" alt="" loading="lazy"></p>
-<h2 id="53-创建的流程中文乱码解决">5.3 创建的流程中文乱码解决</h2>
+<h2 id="62-创建的流程中文乱码解决">6.2 创建的流程中文乱码解决</h2>
 <p>1、修改IDEA中的文件配置 配置全部为UTF-8 File-settings-edit-file encodings 全部设置为UTF-8，如下图中设置<br>
 <img src="https://outman-007.github.io/post-images/1622694965471.png" alt="" loading="lazy"><br>
 2、若设置了还有问题就设置idea的全局变量 在全局变量后面添加</p>
@@ -642,13 +643,13 @@ Boundary event-边界事件<br>
 <img src="https://outman-007.github.io/post-images/1622695239180.png" alt="" loading="lazy"><br>
 3、若还有问题则在 c盘中找对应的idea64.exe.vmoptions，下面的路径不确定可以在c盘中进行搜索，找到对应的文件之后在文件的最后一行中添加 -Dfile.encoding=UTF-8<br>
 <img src="https://outman-007.github.io/post-images/1622695851298.png" alt="" loading="lazy"></p>
-<h2 id="54-生成png文件">5.4 生成png文件</h2>
+<h2 id="63-生成png文件">6.3 生成png文件</h2>
 <p>首先将刚生产的evention.bpmn文件复制一份保存在本地，防止文件破坏<br>
 其次将项目中的evention.bpm文件的后缀修改成为.xml文件 并导出 如下图：<br>
 <img src="https://outman-007.github.io/post-images/1622696653966.png" alt="" loading="lazy"><br>
 导出的png复制到项目中和bpmn文件的名称相同放在同一个目录文件夹下 导出的npm文件如下：<br>
 <img src="https://outman-007.github.io/post-images/1622696798534.png" alt="" loading="lazy"></p>
-<h2 id="55-流程部署">5.5 流程部署</h2>
+<h2 id="64-流程部署">6.4 流程部署</h2>
 <pre><code class="language-java">    @Test
     public void deployMent() {
         // 1、创建ProcessEngine工具类
@@ -668,7 +669,7 @@ Boundary event-边界事件<br>
 ACT_RE_PROCDEF --流程定义表 只有新的流程会生成记录，一个流程只生成一条数据<br>
 ACT_RE_DEPLOYMENT--部署单元信息同一个流程每定义一次生成一条数据<br>
 ACT_GE_BYTEARRAY --通用的流程定义和流程资源 用来存储对应的bpmn文件和png文件的</p>
-<h2 id="56-启动流程">5.6 启动流程</h2>
+<h2 id="65-启动流程">6.5 启动流程</h2>
 <pre><code class="language-java">    public void startProcess() {
         // 启动流程设置
         // 1、创建ProcessEngine引擎类
@@ -693,7 +694,7 @@ ACT_RU_IDENTITYLINK --运行时用户关系信息，存储任务节点与参与�
 <p>SELECT * FROM ACT_RU_EXECUTION --运行时流程执行实例 流程每走一步添加一条流程执行数据<br>
 SELECT * FROM ACT_RU_TASK --运行时任务流程每走一步变化异常流程信息，更新当前流程下一步去哪里<br>
 SELECT * FROM ACT_RU_IDENTITYLINK --运行时用户关系信息，存储任务节点与参与者的相关信息 存储当前流程中每一步中流程和人的关系表，例如：这一步是谁来审核了</p>
-<h2 id="57-个人任务查询">5.7 个人任务查询</h2>
+<h2 id="66-个人任务查询">6.6 个人任务查询</h2>
 <pre><code class="language-java">    public void QueryTask() {
         // 1、创建引擎
         ProcessEngine defaultProcessEngine = ProcessEngines.getDefaultProcessEngine();
@@ -715,7 +716,7 @@ SELECT * FROM ACT_RU_IDENTITYLINK --运行时用户关系信息，存储任务�
         // 任务名称=创建出差请求
     }
 </code></pre>
-<h2 id="58-个人任务完成">5.8 个人任务完成</h2>
+<h2 id="67-个人任务完成">6.7 个人任务完成</h2>
 <pre><code class="language-java">    public void finishTask() {
         // 个人任务完成
         // 1、创建引擎
@@ -732,7 +733,7 @@ SELECT * FROM ACT_RU_IDENTITYLINK --运行时用户关系信息，存储任务�
         taskService.complete(task.getId());
     }
 </code></pre>
-<h2 id="59-使用压缩文件来进行流程的部署">5.9 使用压缩文件来进行流程的部署</h2>
+<h2 id="68-使用压缩文件来进行流程的部署">6.8 使用压缩文件来进行流程的部署</h2>
 <p>当在一个程序中有多个流程进行部署的时候，使用名称进行部署就会需要写很多的读取bpmn文件和.png文件的代码，所以会有使用压缩文件来进行批量的部署，压缩包中可以写多个流程进行流程的部署<br>
 首先要将.bpmn文件和.png的文件进行压缩处理文件名称可以是任意的.zip文件</p>
 <pre><code class="language-java">    public void zipDevelopMent() {
@@ -749,7 +750,6 @@ SELECT * FROM ACT_RU_IDENTITYLINK --运行时用户关系信息，存储任务�
         repositoryService.createDeployment().addZipInputStream(zipInputStream).deploy();
     }
 </code></pre>
-<h1 id="六-流程操作">六、流程操作</h1>
 ]]></content>
     </entry>
 </feed>
