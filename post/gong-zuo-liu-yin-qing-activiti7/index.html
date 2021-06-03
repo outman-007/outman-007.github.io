@@ -68,7 +68,7 @@
       <div class="hide-on-mobile hide-on-tablet hide-on-desktop">
         <div id="search-lightbox" class="grid-container grid-small grid-parent mfp-hide">
           <div class="search-wrapper section">
-            <form id="gridea-search-form" data-update="1622713535148" action="/search/index.html" class="search-form" _lpchecked="1">
+            <form id="gridea-search-form" data-update="1622716734806" action="/search/index.html" class="search-form" _lpchecked="1">
               <input type="text" name="q" id="s" value="" class="search-field" placeholder="搜点啥..." aria-label="搜点啥..." required="">
               <button type="submit" class="submit" aria-label="Submit">
                 <i class="fa fa-search-line"></i>
@@ -708,8 +708,9 @@ User Task 用户任务 Service Task 服务任务 Sub Process 子流程<br>
 --专门为中间捕获事件设置的，允许设置多个输出流指向多个不同的中间捕获事件，当流程执行到事件网关后，流程处于等待状态，需要等待抛出事件才能将等待状态转换为活动状态。</p>
 <h1 id="六-流程操作">六、流程操作</h1>
 <h2 id="61-流程定义">6.1 流程定义</h2>
-<p><strong>Activiti-Designer使用</strong><br>
-<strong>Paletter（画板）</strong><br>
+<p><strong>Activiti-Designer使用</strong></p>
+<h3 id="611-流程工具准备">6.1.1 流程工具准备</h3>
+<p><strong>Paletter（画板）</strong><br>
 在IDEA中安装插件即可使用，画板中包括以下节点：<br>
 Connection -连接<br>
 Event--事件<br>
@@ -717,14 +718,14 @@ Task--任务<br>
 Gatway--网关<br>
 Container-容器<br>
 Boundary event-边界事件<br>
-流程设计完毕保存生成.bpmn文件<br>
-<strong>新建流程（IDEA工具）</strong><br>
-首先选中存放图形的目录（选择resoures下的bpmn目录），点击菜单：New-BpmnFile,如图：<br>
+流程设计完毕保存生成.bpmn文件</p>
+<h3 id="612-新建流程idea工具">6.1.2 新建流程（IDEA工具）**</h3>
+<p>首先选中存放图形的目录（选择resoures下的bpmn目录），点击菜单：New-BpmnFile,如图：<br>
 <img src="https://outman-007.github.io/post-images/1622690488935.png" alt="" loading="lazy"><br>
 设置流程ID和流程名称 在流程的空白处进行点击修改对应的ID和名称是对应的流程的ID和名称如下图：   <img src="https://outman-007.github.io/post-images/1622691153834.png" alt="" loading="lazy"><br>
 设置流程中的各个流程的操作人如下图：<br>
 <img src="https://outman-007.github.io/post-images/1622691320447.png" alt="" loading="lazy"></p>
-<h2 id="62-创建的流程中文乱码解决">6.2 创建的流程中文乱码解决</h2>
+<h3 id="613创建的流程中文乱码解决">6.1.3创建的流程中文乱码解决</h3>
 <p>1、修改IDEA中的文件配置 配置全部为UTF-8 File-settings-edit-file encodings 全部设置为UTF-8，如下图中设置<br>
 <img src="https://outman-007.github.io/post-images/1622694965471.png" alt="" loading="lazy"><br>
 2、若设置了还有问题就设置idea的全局变量 在全局变量后面添加</p>
@@ -734,13 +735,13 @@ Boundary event-边界事件<br>
 <img src="https://outman-007.github.io/post-images/1622695239180.png" alt="" loading="lazy"><br>
 3、若还有问题则在 c盘中找对应的idea64.exe.vmoptions，下面的路径不确定可以在c盘中进行搜索，找到对应的文件之后在文件的最后一行中添加 -Dfile.encoding=UTF-8<br>
 <img src="https://outman-007.github.io/post-images/1622695851298.png" alt="" loading="lazy"></p>
-<h2 id="63-生成png文件">6.3 生成png文件</h2>
+<h3 id="614生成png文件">6.1.4生成png文件</h3>
 <p>首先将刚生产的evention.bpmn文件复制一份保存在本地，防止文件破坏<br>
 其次将项目中的evention.bpm文件的后缀修改成为.xml文件 并导出 如下图：<br>
 <img src="https://outman-007.github.io/post-images/1622696653966.png" alt="" loading="lazy"><br>
 导出的png复制到项目中和bpmn文件的名称相同放在同一个目录文件夹下 导出的npm文件如下：<br>
 <img src="https://outman-007.github.io/post-images/1622696798534.png" alt="" loading="lazy"></p>
-<h2 id="64-流程部署">6.4 流程部署</h2>
+<h2 id="62-流程部署">6.2 流程部署</h2>
 <pre><code class="language-java">    @Test
     public void deployMent() {
         // 1、创建ProcessEngine工具类
@@ -760,7 +761,7 @@ Boundary event-边界事件<br>
 ACT_RE_PROCDEF --流程定义表 只有新的流程会生成记录，一个流程只生成一条数据<br>
 ACT_RE_DEPLOYMENT--部署单元信息同一个流程每定义一次生成一条数据<br>
 ACT_GE_BYTEARRAY --通用的流程定义和流程资源 用来存储对应的bpmn文件和png文件的</p>
-<h2 id="65-启动流程">6.5 启动流程</h2>
+<h2 id="63-启动流程">6.3 启动流程</h2>
 <pre><code class="language-java">    public void startProcess() {
         // 启动流程设置
         // 1、创建ProcessEngine引擎类
@@ -785,7 +786,7 @@ ACT_RU_IDENTITYLINK --运行时用户关系信息，存储任务节点与参与�
 <p>SELECT * FROM ACT_RU_EXECUTION --运行时流程执行实例 流程每走一步添加一条流程执行数据<br>
 SELECT * FROM ACT_RU_TASK --运行时任务流程每走一步变化异常流程信息，更新当前流程下一步去哪里<br>
 SELECT * FROM ACT_RU_IDENTITYLINK --运行时用户关系信息，存储任务节点与参与者的相关信息 存储当前流程中每一步中流程和人的关系表，例如：这一步是谁来审核了</p>
-<h2 id="66-个人任务查询">6.6 个人任务查询</h2>
+<h2 id="64-任务查询">6.4 任务查询</h2>
 <pre><code class="language-java">    public void QueryTask() {
         // 1、创建引擎
         ProcessEngine defaultProcessEngine = ProcessEngines.getDefaultProcessEngine();
@@ -807,7 +808,7 @@ SELECT * FROM ACT_RU_IDENTITYLINK --运行时用户关系信息，存储任务�
         // 任务名称=创建出差请求
     }
 </code></pre>
-<h2 id="67-个人任务完成">6.7 个人任务完成</h2>
+<h2 id="65-流程任务完成">6.5 流程任务完成</h2>
 <pre><code class="language-java">    public void finishTask() {
         // 个人任务完成
         // 1、创建引擎
@@ -824,7 +825,7 @@ SELECT * FROM ACT_RU_IDENTITYLINK --运行时用户关系信息，存储任务�
         taskService.complete(task.getId());
     }
 </code></pre>
-<h2 id="68-使用压缩文件来进行流程的部署">6.8 使用压缩文件来进行流程的部署</h2>
+<h2 id="66-使用压缩文件来进行流程的部署">6.6 使用压缩文件来进行流程的部署</h2>
 <p>当在一个程序中有多个流程进行部署的时候，使用名称进行部署就会需要写很多的读取bpmn文件和.png文件的代码，所以会有使用压缩文件来进行批量的部署，压缩包中可以写多个流程进行流程的部署<br>
 首先要将.bpmn文件和.png的文件进行压缩处理文件名称可以是任意的.zip文件</p>
 <pre><code class="language-java">    public void zipDevelopMent() {
@@ -841,6 +842,55 @@ SELECT * FROM ACT_RU_IDENTITYLINK --运行时用户关系信息，存储任务�
         repositoryService.createDeployment().addZipInputStream(zipInputStream).deploy();
     }
 </code></pre>
+<h2 id="67-流程定义信息查询">6.7 流程定义信息查询</h2>
+<pre><code class="language-java">    public void queryProcessDefinition() {
+        // 流程信息查询
+        // 1、创建引擎
+        ProcessEngine defaultProcessEngine = ProcessEngines.getDefaultProcessEngine();
+        // 2、获取RepostoryService
+        RepositoryService repositoryService = defaultProcessEngine.getRepositoryService();
+        // 3、获取ProcessDefinitionQuery对象
+        ProcessDefinitionQuery definitionQuery = repositoryService.createProcessDefinitionQuery();
+        // 4、查询当前流程KEY的所有流程定义，返回流程定义的集合
+        // processDefinitionKey 流程定义key
+        // orderByProcessDefinitionVersion 通过版本进行排序
+        // desc 逆序
+        // 查询出list
+        List&lt;ProcessDefinition&gt; myEvection =
+            definitionQuery.processDefinitionKey(&quot;myEvention&quot;).orderByProcessDefinitionVersion().desc().list();
+        // 5、输出
+        for (ProcessDefinition processDefinition : myEvection) {
+            System.out.println(&quot;流程定义ID:&quot; + processDefinition.getId());
+            System.out.println(&quot;流程定义名称:&quot; + processDefinition.getName());
+            System.out.println(&quot;流程定义key:&quot; + processDefinition.getKey());
+            System.out.println(&quot;流程定义版本:&quot; + processDefinition.getVersion());
+            System.out.println(&quot;流程部署ID:&quot; + processDefinition.getDeploymentId());
+            // 输出对应
+            // 流程定义ID:myEvention:1:4
+            // 流程定义名称:出差流程
+            // 流程定义key:myEvention
+            // 流程定义版本:1
+            // 流程部署ID:1
+        }
+    }
+</code></pre>
+<h2 id="68-流程删除">6.8 流程删除</h2>
+<pre><code class="language-java">    public void deleteDeployMent() {
+        // 流程信息删除
+        // 1、创建引擎
+        ProcessEngine defaultProcessEngine = ProcessEngines.getDefaultProcessEngine();
+        // 2、获取RepostoryService
+        RepositoryService repositoryService = defaultProcessEngine.getRepositoryService();
+        // 3、通过部署ID来删除当前的部署信息
+        // 通过ID删除的数据就是在部署时创建的数据
+        // deleteDeployment中可以有两个参数 第一个参数是 部署ID 第二个参数是一个boolean的值
+        // 当当前的流程有没有执行完的步骤的时候只有一个参数的 deleteDeployment方法不能删除成功 只有当第二个参数为true的时候才能全部删除进行级联删除
+        String deploymentId = &quot;1&quot;;
+        repositoryService.deleteDeployment(deploymentId);
+    }
+</code></pre>
+<h2 id="69-流程资源下载">6.9 流程资源下载</h2>
+<h2 id="610-流程历史信息的查看">6.10 流程历史信息的查看</h2>
 
                 </div>
                 <div class="clear"></div>
