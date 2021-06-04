@@ -68,7 +68,7 @@
       <div class="hide-on-mobile hide-on-tablet hide-on-desktop">
         <div id="search-lightbox" class="grid-container grid-small grid-parent mfp-hide">
           <div class="search-wrapper section">
-            <form id="gridea-search-form" data-update="1622716734806" action="/search/index.html" class="search-form" _lpchecked="1">
+            <form id="gridea-search-form" data-update="1622775504035" action="/search/index.html" class="search-form" _lpchecked="1">
               <input type="text" name="q" id="s" value="" class="search-field" placeholder="搜点啥..." aria-label="搜点啥..." required="">
               <button type="submit" class="submit" aria-label="Submit">
                 <i class="fa fa-search-line"></i>
@@ -890,7 +890,75 @@ SELECT * FROM ACT_RU_IDENTITYLINK --运行时用户关系信息，存储任务�
     }
 </code></pre>
 <h2 id="69-流程资源下载">6.9 流程资源下载</h2>
+<p>现在我们的流程资源文件已经上传到数据库了，如果其他用户想要查看这些资源文件，可以从数据库中吧资源文件下载到本地。<br>
+解决方案有：<br>
+1、JDBC对Blob类型，clob类型数据读取出来，保存到文件目录<br>
+2、使用Activiti的api来实现<br>
+使用commons-io.jar解决IO的操作<br>
+引入commons-io依赖包</p>
+<pre><code class="language-xml"> &lt;dependency&gt;
+            &lt;groupId&gt;commons-io&lt;/groupId&gt;
+            &lt;artifactId&gt;commons-io&lt;/artifactId&gt;
+            &lt;version&gt;2.5&lt;/version&gt;
+        &lt;/dependency&gt;
+</code></pre>
+<p>具体的代码实现如下：</p>
+<pre><code class="language-java">    public void getDeployment() throws Exception {
+        // 1、得到引擎
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        // 2、获取api RepositoryService
+        RepositoryService repositoryService = processEngine.getRepositoryService();
+        // 3、获取查询对象 ProcessDefinitionQuery,查询流程定义信息
+        ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();
+        // 4、通过流程定义信息获取部署ID
+        ProcessDefinition processDefinition = processDefinitionQuery.processDefinitionKey(&quot;myEvention&quot;).singleResult();
+        // 获取部署ID
+        String deploymentId = processDefinition.getDeploymentId();
+        // 获取png资源的名称
+        String pngName = processDefinition.getDiagramResourceName();
+        // 获取bpmn文件的名称
+        String bpmnName = processDefinition.getResourceName();
+        // 5、通过RepositoryService,传递部署id参数，读取资源信息（png和bpmn文件）
+        // 5.1、获取png图片流
+        InputStream pngInputStream = repositoryService.getResourceAsStream(deploymentId, pngName);
+        // 5.2、获取bpmn文件的流
+        InputStream bpmnInputStream = repositoryService.getResourceAsStream(deploymentId, bpmnName);
+        File pngFile = new File(&quot;d:/evectionflow01.png&quot;);
+        File bpmnFile = new File(&quot;d:/evectionflow01.bpmn&quot;);
+        // 6、构造OutputStream流
+        FileOutputStream pngOutPutStream = new FileOutputStream(pngFile);
+        FileOutputStream bpmnOutPutStream = new FileOutputStream(bpmnFile);
+        // 7、输入输出流的转换 注意IOUtils必须是来自我们刚引入的commons.io包，因为在java中会有很多的IOUtils类
+        IOUtils.copy(pngInputStream, pngOutPutStream);
+        IOUtils.copy(bpmnInputStream, bpmnOutPutStream);
+        // 8、关闭流
+        pngOutPutStream.close();
+        bpmnOutPutStream.close();
+        pngInputStream.close();
+        bpmnInputStream.close();
+        bpmnInputStream.close();
+    }
+</code></pre>
 <h2 id="610-流程历史信息的查看">6.10 流程历史信息的查看</h2>
+<pre><code class="language-java">    public void findHistoryInfo() {
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        HistoryService historyService = processEngine.getHistoryService();
+        HistoricActivityInstanceQuery instanceQuery = historyService.createHistoricActivityInstanceQuery();
+        instanceQuery.processDefinitionId(&quot;2502&quot;);
+        // 按创建时间进行排序
+        instanceQuery.orderByHistoricActivityInstanceEndTime().asc();
+        List&lt;HistoricActivityInstance&gt; list = instanceQuery.list();
+        // 输出
+        for (HistoricActivityInstance history : list) {
+            System.out.println(history.getActivityId());
+            System.out.println(history.getActivityName());
+            System.out.println(history.getProcessDefinitionId());
+            System.out.println(history.getProcessInstanceId());
+            System.out.println(&quot;===================================&quot;);
+        }
+    }
+}
+</code></pre>
 
                 </div>
                 <div class="clear"></div>
