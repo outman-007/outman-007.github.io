@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://outman-007.github.io</id>
     <title>奥特MAN</title>
-    <updated>2021-06-04T05:38:44.411Z</updated>
+    <updated>2021-06-04T09:24:40.003Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://outman-007.github.io"/>
     <link rel="self" href="https://outman-007.github.io/atom.xml"/>
@@ -29,6 +29,8 @@
 <p>启动流程实例时，指定的businesskey,就会在act_ru_exception 流程实例的执行表中存储businesskey。</p>
 <p>Businesskey:业务标识，通常为业务表的主键，业务标识和流程实例一一对应，业务标识来源于业务系统。存储业务标识就是根据业务标识来关联查询业务系统的数据。</p>
 <p>比如：出差流程启动一个流程实例，就可以将出差单的id作为业务标识存储到activiti中，将来查询activiti的流程实例信息就可以获取出差单的ID从而关联查询业务系统数据库得到出差单信息。</p>
+<h2 id="创建简单的流程实例">创建简单的流程实例</h2>
+<p>根据businesskey来创建一个流程实例 business就是业务ID,让流程和业务关联起来</p>
 <pre><code class="language-java">    public void addBusinessKey() {
         // 启动流程实例并添加业务businesskey来进行数据的保存
         // 1.得到引擎
@@ -45,7 +47,154 @@
 </code></pre>
 <p>Activiti的act_ru_execution中存储业务标识<br>
 <img src="https://outman-007.github.io/post-images/1622783595221.png" alt="" loading="lazy"></p>
+<h2 id="操作数据库表">操作数据库表</h2>
+<p>启动流程实例，操作如下数据库表：<br>
+SELECT *  FROM act_ru_execution 流程实例执行表，记录当前流程实例的执行情况<br>
+<img src="https://outman-007.github.io/post-images/1622785374346.png" alt="" loading="lazy"><br>
+说明：</p>
+<p>流程实例执行，如果当前只有一个分支时，一个流程实例只有一条记录且执行表的主键ID和流程实例ID相同，如果当前有多个分支正在运行则该执行表中有多条记录，存在执行表的主键和流程实例id不同记录。不论当前有几个分支总会有一条记录的执行表的主键和流程实例的ID相同。</p>
+<p>一个流程实例运行完成，此表中与流程实例相关的记录删除。</p>
+<p>SELECT * FROM act_ru_task 任务执行表，记录当前执行的任务<br>
+<img src="https://outman-007.github.io/post-images/1622785845237.png" alt="" loading="lazy"><br>
+说明：启动流程实例，流程当前执行到第一个任务结点，此表会插入一条记录表示当前任务的执行情况，如果任务完成则记录删除。</p>
+<p>SELECT * FROM act_ru_identitylink 任务参与者，记录当前参与任务的用户或者组<br>
+<img src="https://outman-007.github.io/post-images/1622786106157.png" alt="" loading="lazy"></p>
+<p>SELECT * FROM act_hi_procinst 流程实例历史表<br>
+<img src="https://outman-007.github.io/post-images/1622786433364.png" alt="" loading="lazy"><br>
+流程启动，会在此表插入一条记录，流程实例运行完成记录也不会删除。<br>
+SELECT * FROM act_hi_taskinst 任务历史表，记录所有的任务<br>
+<img src="https://outman-007.github.io/post-images/1622786594499.png" alt="" loading="lazy"><br>
+开始一个任务，不仅在act_ru_task表插入记录，也会在历史任务表插入一条记录，任务历史表的主键就是任务ID，任务完成此表不会删除。</p>
+<h2 id="流程的激活和挂载">流程的激活和挂载</h2>
+<p>在流程定义下可以对应有多个流程实例</p>
+<p>流程实例的挂起和激活的案例：<br>
+例如公司每个月最后一天是不进行出差申请处理的，为了保证这个月的财务入账，但是当公司中的某个员工就是要发起出差申请，这个时候就需要来挂起这个流程实例不要让这个流程往下审核处理。当过了这个月之后再将挂起的流程申请进行激活，以便进行审批。这就是流程实例的挂起和激活</p>
+<h3 id="批量进行流程的激活和挂起">批量进行流程的激活和挂起</h3>
+<p>批量进行流程实例的激活和挂起的方式就是通过流程定义的key来进行对当前流程定义下的所有流程实例进行激活和挂载（RepositoryService）</p>
+<pre><code class="language-java">    public void suspendedAllInstance() {
+        // 挂载所有的的流程实例
+        // 1.创建引擎
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        // 2.获取ReposotoryService
+        RepositoryService repositoryService = processEngine.getRepositoryService();
+        // 3.查询流程定义，获取流程定义查询对象
+        ProcessDefinition processDefinition =
+            repositoryService.createProcessDefinitionQuery().processDefinitionKey(&quot;myEvention&quot;).singleResult();
+        // 4.获取当前流程的挂起状态
+        // suspended 是一个boolean值 当值为true的时候是说明当前流程实例是挂起状态 false是流程激活状态
+        boolean suspended = processDefinition.isSuspended();
+        // 5.获取流程定义ID
+        String definitionId = processDefinition.getId();
+        if (suspended) {
+            // 如果挂起，可以执行激活操作 参数1：流程定义ID 参数2： 是否需要激活 参数3：激活时间
+            repositoryService.activateProcessDefinitionById(definitionId, true, null);
+            System.out.println(&quot;流程定义ID为：&quot; + definitionId + &quot;已激活&quot;);
+        } else {
+            // 如果是激活状态，可以使用挂起操作，
+            repositoryService.suspendProcessDefinitionById(definitionId, true, null);
+            System.out.println(&quot;流程定义ID为：&quot; + definitionId + &quot;已挂起&quot;);
+        }
+    }
+</code></pre>
+<h3 id="单个流程激活和挂起">单个流程激活和挂起</h3>
+<pre><code class="language-java">    public void suspendedSingletonInstance() {
+        // 单个流程实例的挂起和流程激活
+        // 1.创建流程引擎
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        // 2.引入RuntimeService
+        RuntimeService runtimeService = processEngine.getRuntimeService();
+        // 3.获取流程实例查询对象
+        ProcessInstanceQuery instanceQuery = runtimeService.createProcessInstanceQuery();
+        // 4.通过流程实例ID来查询当前的流程实例
+        ProcessInstance processInstance = instanceQuery.processInstanceId(&quot;2501&quot;).singleResult();
+        // 5.获取流程实例ID
+        String instanceId = processInstance.getId();
+        // 6.获取当前流程的激活状态
+        // suspended 为true的时候是当前流程实例是挂起的状态 false的时候当前流程实例是激活状态
+        boolean suspended = processInstance.isSuspended();
+        if (suspended) {
+            runtimeService.activateProcessInstanceById(instanceId);
+            System.out.println(&quot;流程实例ID为：&quot; + instanceId + &quot;已激活&quot;);
+        } else {
+            runtimeService.suspendProcessInstanceById(instanceId);
+            System.out.println(&quot;流程实例ID为：&quot; + instanceId + &quot;已挂起&quot;);
+        }
+    }
+</code></pre>
 <h1 id="二-个人任务">二、个人任务</h1>
+<h2 id="21-分配任务负责人">2.1 分配任务负责人</h2>
+<pre><code>  ### 2.1.1 固定分配
+  就是在创建流程定义的时候直接指定对应的任务分配人 例如下图：
+</code></pre>
+<p><img src="https://outman-007.github.io/post-images/1622796071743.png" alt="" loading="lazy"><br>
+### 2.1.2 表达式分配<br>
+由于固定分配方式，任务只管一步一步执行任务，执行到每个任务将按照 bpmn的配置去分配任务负责人。<br>
+#### 2.1.2.1 UEL表达式<br>
+Activiti使用UEL表达式，UEL是javaEE6规范的一部分，UEL(unified exception language)即 统一表达式语言，activiti支持两个UEL表达式：UEL-value和UEL-method。<br>
+1）UEL-value定义<br>
+<img src="https://outman-007.github.io/post-images/1622795985313.png" alt="" loading="lazy"></p>
+<pre><code class="language-java">    public void testUELValue() {
+        // 使用UEL-value进行责任人的配置
+        // 1.获取引擎
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        // 2.获取RuntimeService
+        RuntimeService runtimeService = processEngine.getRuntimeService();
+        Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+        // 其中 assignment 0-3名称是和流程表中的名称对应起来的
+        map.put(&quot;assignment0&quot;, &quot;张三&quot;);
+        map.put(&quot;assignment1&quot;, &quot;李经理&quot;);
+        map.put(&quot;assignment2&quot;, &quot;张总&quot;);
+        map.put(&quot;assignment3&quot;, &quot;刘财务&quot;);
+        runtimeService.startProcessInstanceByKey(&quot;myEvention&quot;, map);
+    }
+</code></pre>
+<pre><code>  2）UEL-methid方式
+</code></pre>
+<p><img src="https://outman-007.github.io/post-images/1622796196251.png" alt="" loading="lazy"><br>
+userBean是Srping容器中的一个bean,表示调用该bean的getUserId()方法。<br>
+3）UEL-method与UEL-value结合<br>
+再比如：<br>
+${idapService.findManagerForEmployee(emp)}<br>
+idapService是Spring容器的一个Bean,findManageForEmployee是该Bean的一个方法，emp是activiti流程变量，emp作为参数传到IdapService.findManagerForEmployee方法中。<br>
+4）其他<br>
+表达式支持解析基础类型、bean、list、array和map,也可作为条件判断。<br>
+如下：<br>
+${order.price&gt;100&amp;&amp;order.price&lt;250}<br>
+### 2.1.3 监听器分配<br>
+可以使用监听器来完成很多Activiti流程的业务。<br>
+在本章我们使用监听器的方式我们来指定负责人，那么在流程设计的时候就不要指定assignee任务监听器是发生对应的任务相关事件的执行自定义java逻辑或者表达式。<br>
+<img src="https://outman-007.github.io/post-images/1622797865651.png" alt="" loading="lazy"><br>
+event的选项包含：<br>
+<code>text Create:任务创建后触发 Assignment:任务分配后触发 Delete: 任务完成后触发 All: 所有事件发生都要进行触发</code><br>
+定义任务监听类，且必须实现org.activiti.engine.delegate.TaskListener接口</p>
+<pre><code class="language-java">/**
+ * 创建监听器类进行责任人的分配 必须要实现 org.activiti.engine.delegate.TaskListener接口
+ */
+public class MyTaskListener implements TaskListener {
+    public void notify(DelegateTask delegateTask) {
+        // 在使用流程处理的时候，每一步都需要进行对应的责任人来进行处理
+        // 创建出差申请 这个名称是当前节点的名称
+        if (delegateTask.getName().equals(&quot;创建出差申请&quot;) &amp;&amp; delegateTask.getEventName().equals(&quot;create&quot;)) {
+            // 设置当前节点的处理人的名称
+            delegateTask.setAssignee(&quot;张三&quot;);
+        }
+        if (delegateTask.getName().equals(&quot;经理审批&quot;) &amp;&amp; delegateTask.getEventName().equals(&quot;create&quot;)) {
+            // 设置当前节点的处理人的名称
+            delegateTask.setAssignee(&quot;李四&quot;);
+        }
+        if (delegateTask.getName().equals(&quot;总经理审&quot;) &amp;&amp; delegateTask.getEventName().equals(&quot;create&quot;)) {
+            // 设置当前节点的处理人的名称
+            delegateTask.setAssignee(&quot;王五&quot;);
+        }
+        if (delegateTask.getName().equals(&quot;财务审批&quot;) &amp;&amp; delegateTask.getEventName().equals(&quot;create&quot;)) {
+            // 设置当前节点的处理人的名称
+            delegateTask.setAssignee(&quot;赵六&quot;);
+        }
+    }
+}
+</code></pre>
+<h2 id="22-查询任务">2.2 查询任务</h2>
+<h2 id="23-办理任务">2.3 办理任务</h2>
 <h1 id="三-流程变量">三、流程变量</h1>
 <h1 id="四-组任务">四、组任务</h1>
 <h1 id="五-网关">五、网关</h1>
