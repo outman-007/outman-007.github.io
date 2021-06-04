@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://outman-007.github.io</id>
     <title>奥特MAN</title>
-    <updated>2021-06-04T03:00:41.003Z</updated>
+    <updated>2021-06-04T05:36:33.725Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://outman-007.github.io"/>
     <link rel="self" href="https://outman-007.github.io/atom.xml"/>
@@ -10,6 +10,48 @@
     <logo>https://outman-007.github.io/images/avatar.png</logo>
     <icon>https://outman-007.github.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 奥特MAN</rights>
+    <entry>
+        <title type="html"><![CDATA[Activiti进阶]]></title>
+        <id>https://outman-007.github.io/post/activiti-jin-jie/</id>
+        <link href="https://outman-007.github.io/post/activiti-jin-jie/">
+        </link>
+        <updated>2021-06-04T03:08:18.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="一-流程实例">一、流程实例</h1>
+<h2 id="什么是流程实例">什么是流程实例</h2>
+<p><strong>流程实例</strong>（processinstance）代表流程定义的执行实例。<br>
+一个流程实例包括了所有的运行节点，我们可以利用这个对象来了解当前流程实例的进度等信息。<br>
+例如：用户或者程序按照流程定义内容发起一个流程，这就是一个流程实例。<br>
+流程定义和流程实例图解：<br>
+<img src="https://outman-007.github.io/post-images/1622782242393.png" alt="" loading="lazy"><br>
+在真实的业务开发中的流程定义如下图：<br>
+<img src="https://outman-007.github.io/post-images/1622782339077.png" alt="" loading="lazy"><br>
+比如部署系统出差流程后，如果某用户要申请出差这时就需要执行这个流程，如果另一个用户也要申请出差也需要执行该流程，每个流程互不影响，每个执行是单独的流程实例。</p>
+<p>启动流程实例时，指定的businesskey,就会在act_ru_exception 流程实例的执行表中存储businesskey。</p>
+<p>Businesskey:业务标识，通常为业务表的主键，业务标识和流程实例一一对应，业务标识来源于业务系统。存储业务标识就是根据业务标识来关联查询业务系统的数据。</p>
+<p>比如：出差流程启动一个流程实例，就可以将出差单的id作为业务标识存储到activiti中，将来查询activiti的流程实例信息就可以获取出差单的ID从而关联查询业务系统数据库得到出差单信息。</p>
+<pre><code class="language-java">    public void addBusinessKey() {
+        // 启动流程实例并添加业务businesskey来进行数据的保存
+        // 1.得到引擎
+        ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+        // 2.获取RuntimeService
+        RuntimeService runtimeService = processEngine.getRuntimeService();
+        // 部署流程key 是在文件创建的时候创建的创建的流程ID
+        String processDefinitionKey = &quot;myEvention&quot;;
+        // 业务ID
+        String businessKey = &quot;1001&quot;;
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processDefinitionKey, businessKey);
+        System.out.println(&quot;生成后获取的businessKey:&quot; + processInstance.getBusinessKey());
+    }
+</code></pre>
+<p>Activiti的act_ru_execution中存储业务标识<br>
+<img src="https://outman-007.github.io/post-images/1622783595221.png" alt="" loading="lazy"></p>
+<h1 id="二-个人任务">二、个人任务</h1>
+<h1 id="三-流程变量">三、流程变量</h1>
+<h1 id="四-组任务">四、组任务</h1>
+<h1 id="五-网关">五、网关</h1>
+<h1 id="六-课程总结">六、课程总结</h1>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[工作流引擎Activiti7]]></title>
         <id>https://outman-007.github.io/post/gong-zuo-liu-yin-qing-activiti7/</id>
