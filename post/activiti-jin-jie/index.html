@@ -2,7 +2,7 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Activiti进阶 | 奥特MAN</title>
+<title>Activiti7进阶 | 奥特MAN</title>
 <meta name="description" content="人一能之 己百之，人十能之 己千之，果能此道矣，虽愚必明 ，虽柔必强." />
 <link rel="shortcut icon" href="https://outman-007.github.io/favicon.ico">
 <link rel="stylesheet" href="https://outman-007.github.io/styles/main.css">
@@ -69,7 +69,7 @@
       <div class="hide-on-mobile hide-on-tablet hide-on-desktop">
         <div id="search-lightbox" class="grid-container grid-small grid-parent mfp-hide">
           <div class="search-wrapper section">
-            <form id="gridea-search-form" data-update="1622798666360" action="/search/index.html" class="search-form" _lpchecked="1">
+            <form id="gridea-search-form" data-update="1622800489216" action="/search/index.html" class="search-form" _lpchecked="1">
               <input type="text" name="q" id="s" value="" class="search-field" placeholder="搜点啥..." aria-label="搜点啥..." required="">
               <button type="submit" class="submit" aria-label="Submit">
                 <i class="fa fa-search-line"></i>
@@ -84,7 +84,7 @@
         <div class="center content">
           <div class="featured-image cover" style="background-image: url('https://outman-007.github.io/post-images/activiti-jin-jie.png');">
             <div class="meta top"> 
-              <time class="meta-info" style="float:left;" datetime="2021-06-04"><i class="fa fa-calendar"></i><span class="lately">6 小时前</span></time>
+              <time class="meta-info" style="float:left;" datetime="2021-06-04"><i class="fa fa-calendar"></i><span class="lately">7 小时前</span></time>
               
               <a href="https://outman-007.github.io/post/activiti-jin-jie/#comments" class="comments meta-info" title="">
                 <i class="fa fa-comment remixicon"></i><span class="comment-count valine-comment-count" data-xid="/activiti-jin-jie/"> </span>
@@ -102,7 +102,7 @@
                       <a href="https://outman-007.github.io/tag/lTazIF5D4/" class="ctag ctag-2 ctag-lTazIF5D4" aria-label="">activiti7</a>
                     
               </div>
-              <h1 class="title ularge white bold">Activiti进阶</h1>
+              <h1 class="title ularge white bold">Activiti7进阶</h1>
             </div>
           </div>
         </div>  
@@ -290,7 +290,84 @@ public class MyTaskListener implements TaskListener {
 }
 </code></pre>
 <h2 id="22-查询任务">2.2 查询任务</h2>
+<p>查询任务负责人的代办任务</p>
+<pre><code class="language-java">    public void QueryTask() {
+     // 1、创建引擎
+     ProcessEngine defaultProcessEngine = ProcessEngines.getDefaultProcessEngine();
+     // 2、创建任务TaskService
+     TaskService taskService = defaultProcessEngine.getTaskService();
+     // 3、执行查询 根据当前的流程id来获取对应的流程信息 和当前操作人来获取当前的流程信息
+     List&lt;Task&gt; list =
+         taskService.createTaskQuery().processDefinitionKey(&quot;myEvention&quot;).taskAssignee(&quot;zhaoliu&quot;).list();
+     for (Task task : list) {
+         System.out.println(&quot;流程实例ID=&quot; + task.getProcessInstanceId());
+         System.out.println(&quot;任务ID=&quot; + task.getId());
+         System.out.println(&quot;任务负责人=&quot; + task.getAssignee());
+         System.out.println(&quot;任务名称=&quot; + task.getName());
+     }
+     // 对应的输出
+     // 流程实例ID=2501
+     // 任务ID=2505
+     // 任务负责人=zhangsan
+     // 任务名称=创建出差请求
+ }
+</code></pre>
+<p><strong>关联 businesskey</strong></p>
+<p>需求：<br>
+在activiti实际应用时，查询待办任务可能要显示出业务系统的一些相关信息。<br>
+比如：查询待审批出差任务列表需要将出差单的日期，出差的天数等信息显示出来。<br>
+出差天数等信息在业务系统中存在，而并没有在activiti数据库中存在，所以是无法通过activiti的api查询出天数等详细信息。<br>
+实现：<br>
+在查询待办任务时，通过businessKey（业务表示）关联查询业务系统的出差表单，查询出出差天数等信息。</p>
+<pre><code class="language-java">    @Test
+ public void finishTask() {
+     // 个人任务完成
+     // 1、创建引擎
+     ProcessEngine defaultProcessEngine = ProcessEngines.getDefaultProcessEngine();
+     // 2、创建任务TaskService
+     TaskService taskService = defaultProcessEngine.getTaskService();
+     // 当当前的人在流程中只有一个的时候可以使用singleResult（）来获取对应的值
+     Task task =
+         taskService.createTaskQuery().processDefinitionKey(&quot;myEvention&quot;).taskAssignee(&quot;zhaoliu&quot;).singleResult();
+     System.out.println(&quot;流程实例ID=&quot; + task.getProcessInstanceId());
+     System.out.println(&quot;任务ID=&quot; + task.getId());
+     System.out.println(&quot;任务负责人=&quot; + task.getAssignee());
+     System.out.println(&quot;任务名称=&quot; + task.getName());
+     System.out.println(&quot;任务名称=&quot; + task.getName());
+     RuntimeService runtimeService = defaultProcessEngine.getRuntimeService();
+     ProcessInstance processInstance =
+         runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
+     // 获取到业务ID
+     String businessKey = processInstance.getBusinessKey();
+     // taskService.complete(task.getId());
+ }
+</code></pre>
 <h2 id="23-办理任务">2.3 办理任务</h2>
+<pre><code class="language-java">    @Test
+ public void finishTask() {
+     // 个人任务完成
+     // 1、创建引擎
+     ProcessEngine defaultProcessEngine = ProcessEngines.getDefaultProcessEngine();
+     // 2、创建任务TaskService
+     TaskService taskService = defaultProcessEngine.getTaskService();
+     // 当当前的人在流程中只有一个的时候可以使用singleResult（）来获取对应的值
+     Task task =
+         taskService.createTaskQuery().processDefinitionKey(&quot;myEvention&quot;).taskAssignee(&quot;zhaoliu&quot;).singleResult();
+     System.out.println(&quot;流程实例ID=&quot; + task.getProcessInstanceId());
+     System.out.println(&quot;任务ID=&quot; + task.getId());
+     System.out.println(&quot;任务负责人=&quot; + task.getAssignee());
+     System.out.println(&quot;任务名称=&quot; + task.getName());
+     System.out.println(&quot;任务名称=&quot; + task.getName());
+     RuntimeService runtimeService = defaultProcessEngine.getRuntimeService();
+     // 任务完成前，需要校验当前的负责人可以完成当前任务
+     // 校验方法：
+     // 根据任务ID和任务负责人查询当前任务，如果查到改用户有权限，就完成
+     if (task != null) {
+         taskService.complete(task.getId());
+         System.out.println(&quot;完成任务&quot;);
+     }
+ }
+</code></pre>
 <h1 id="三-流程变量">三、流程变量</h1>
 <h1 id="四-组任务">四、组任务</h1>
 <h1 id="五-网关">五、网关</h1>
@@ -350,7 +427,7 @@ public class MyTaskListener implements TaskListener {
                     <div class="info gradient-effect">
                       <time datetime="2021-06-04">2021-06-04</time>
                       <h4 class="title usmall">
-                        <a href="https://outman-007.github.io/post/activiti-jin-jie/">Activiti进阶</a>
+                        <a href="https://outman-007.github.io/post/activiti-jin-jie/">Activiti7进阶</a>
                       </h4>
                     </div>
                     <div class="clear"></div>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://outman-007.github.io</id>
     <title>奥特MAN</title>
-    <updated>2021-06-04T09:31:39.065Z</updated>
+    <updated>2021-06-04T09:54:54.591Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://outman-007.github.io"/>
     <link rel="self" href="https://outman-007.github.io/atom.xml"/>
@@ -11,7 +11,7 @@
     <icon>https://outman-007.github.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 奥特MAN</rights>
     <entry>
-        <title type="html"><![CDATA[Activiti进阶]]></title>
+        <title type="html"><![CDATA[Activiti7进阶]]></title>
         <id>https://outman-007.github.io/post/activiti-jin-jie/</id>
         <link href="https://outman-007.github.io/post/activiti-jin-jie/">
         </link>
@@ -194,7 +194,84 @@ public class MyTaskListener implements TaskListener {
 }
 </code></pre>
 <h2 id="22-查询任务">2.2 查询任务</h2>
+<p>查询任务负责人的代办任务</p>
+<pre><code class="language-java">    public void QueryTask() {
+     // 1、创建引擎
+     ProcessEngine defaultProcessEngine = ProcessEngines.getDefaultProcessEngine();
+     // 2、创建任务TaskService
+     TaskService taskService = defaultProcessEngine.getTaskService();
+     // 3、执行查询 根据当前的流程id来获取对应的流程信息 和当前操作人来获取当前的流程信息
+     List&lt;Task&gt; list =
+         taskService.createTaskQuery().processDefinitionKey(&quot;myEvention&quot;).taskAssignee(&quot;zhaoliu&quot;).list();
+     for (Task task : list) {
+         System.out.println(&quot;流程实例ID=&quot; + task.getProcessInstanceId());
+         System.out.println(&quot;任务ID=&quot; + task.getId());
+         System.out.println(&quot;任务负责人=&quot; + task.getAssignee());
+         System.out.println(&quot;任务名称=&quot; + task.getName());
+     }
+     // 对应的输出
+     // 流程实例ID=2501
+     // 任务ID=2505
+     // 任务负责人=zhangsan
+     // 任务名称=创建出差请求
+ }
+</code></pre>
+<p><strong>关联 businesskey</strong></p>
+<p>需求：<br>
+在activiti实际应用时，查询待办任务可能要显示出业务系统的一些相关信息。<br>
+比如：查询待审批出差任务列表需要将出差单的日期，出差的天数等信息显示出来。<br>
+出差天数等信息在业务系统中存在，而并没有在activiti数据库中存在，所以是无法通过activiti的api查询出天数等详细信息。<br>
+实现：<br>
+在查询待办任务时，通过businessKey（业务表示）关联查询业务系统的出差表单，查询出出差天数等信息。</p>
+<pre><code class="language-java">    @Test
+ public void finishTask() {
+     // 个人任务完成
+     // 1、创建引擎
+     ProcessEngine defaultProcessEngine = ProcessEngines.getDefaultProcessEngine();
+     // 2、创建任务TaskService
+     TaskService taskService = defaultProcessEngine.getTaskService();
+     // 当当前的人在流程中只有一个的时候可以使用singleResult（）来获取对应的值
+     Task task =
+         taskService.createTaskQuery().processDefinitionKey(&quot;myEvention&quot;).taskAssignee(&quot;zhaoliu&quot;).singleResult();
+     System.out.println(&quot;流程实例ID=&quot; + task.getProcessInstanceId());
+     System.out.println(&quot;任务ID=&quot; + task.getId());
+     System.out.println(&quot;任务负责人=&quot; + task.getAssignee());
+     System.out.println(&quot;任务名称=&quot; + task.getName());
+     System.out.println(&quot;任务名称=&quot; + task.getName());
+     RuntimeService runtimeService = defaultProcessEngine.getRuntimeService();
+     ProcessInstance processInstance =
+         runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
+     // 获取到业务ID
+     String businessKey = processInstance.getBusinessKey();
+     // taskService.complete(task.getId());
+ }
+</code></pre>
 <h2 id="23-办理任务">2.3 办理任务</h2>
+<pre><code class="language-java">    @Test
+ public void finishTask() {
+     // 个人任务完成
+     // 1、创建引擎
+     ProcessEngine defaultProcessEngine = ProcessEngines.getDefaultProcessEngine();
+     // 2、创建任务TaskService
+     TaskService taskService = defaultProcessEngine.getTaskService();
+     // 当当前的人在流程中只有一个的时候可以使用singleResult（）来获取对应的值
+     Task task =
+         taskService.createTaskQuery().processDefinitionKey(&quot;myEvention&quot;).taskAssignee(&quot;zhaoliu&quot;).singleResult();
+     System.out.println(&quot;流程实例ID=&quot; + task.getProcessInstanceId());
+     System.out.println(&quot;任务ID=&quot; + task.getId());
+     System.out.println(&quot;任务负责人=&quot; + task.getAssignee());
+     System.out.println(&quot;任务名称=&quot; + task.getName());
+     System.out.println(&quot;任务名称=&quot; + task.getName());
+     RuntimeService runtimeService = defaultProcessEngine.getRuntimeService();
+     // 任务完成前，需要校验当前的负责人可以完成当前任务
+     // 校验方法：
+     // 根据任务ID和任务负责人查询当前任务，如果查到改用户有权限，就完成
+     if (task != null) {
+         taskService.complete(task.getId());
+         System.out.println(&quot;完成任务&quot;);
+     }
+ }
+</code></pre>
 <h1 id="三-流程变量">三、流程变量</h1>
 <h1 id="四-组任务">四、组任务</h1>
 <h1 id="五-网关">五、网关</h1>
